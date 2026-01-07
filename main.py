@@ -149,7 +149,15 @@ class NeuralNetwork(torch.nn.Module):
         super().__init__()
         self.flatten = torch.nn.Flatten()
         self.linear_relu_stack = torch.nn.Sequential(
-            torch.nn.Linear(512*1536, 512),
+            torch.nn.Conv2d(1,3, kernel_size=3, stride=2),
+            torch.nn.MaxPool2d(1, stride=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(3, 6, kernel_size=3, stride=2),
+            torch.nn.MaxPool2d(1, stride=1),
+            torch.nn.ReLU(),
+
+            # torch.nn.Linear(512*1536, 512),
+            torch.nn.Linear(196607, 512),
             torch.nn.ReLU(),
             # torch.nn.Flatten(),
             torch.nn.Linear(512, 512),
@@ -166,6 +174,7 @@ class NeuralNetwork(torch.nn.Module):
     def forward(self, x):
         # print(x)
         x = self.flatten(x)
+        x = x.unsqueeze(dim=0)
         logits = self.linear_relu_stack(x)
         return logits
 
@@ -184,7 +193,7 @@ model = NeuralNetwork().to(device)
 
 # x = torch.ones(5)
 # y = torch.zeros(3)
-# w = torch.randn(5,3, requires_grad=True)
+# w = torch.randn(5,3, requires_grad=True) 
 # b = torch.randn(3, requires_grad=True)
 # z = torch.matmul(x, w)+b
 
@@ -219,6 +228,8 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         tLabel = torch.tensor(numLabel)
         tLabel = tLabel.to(device, non_blocking=True)
         pred = model(image).to(device)
+        print(pred)
+        print(pred.shape)
         # print(tLabel)
         loss = loss_fn(pred,tLabel)
         optimizer.zero_grad()
