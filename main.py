@@ -149,15 +149,15 @@ class NeuralNetwork(torch.nn.Module):
         super().__init__()
         self.flatten = torch.nn.Flatten()
         self.linear_relu_stack = torch.nn.Sequential(
-            torch.nn.Conv2d(1,3, kernel_size=3, stride=2),
+            """torch.nn.Conv2d(1,3, kernel_size=3, stride=2),
             torch.nn.MaxPool2d(1, stride=1),
             torch.nn.ReLU(),
             torch.nn.Conv2d(3, 6, kernel_size=3, stride=2),
             torch.nn.MaxPool2d(1, stride=1),
-            torch.nn.ReLU(),
+            torch.nn.ReLU(),"""
 
-            # torch.nn.Linear(512*1536, 512),
-            torch.nn.Linear(196607, 512),
+            torch.nn.Linear(512*1536, 512),
+            #torch.nn.Linear(196607, 512),
             torch.nn.ReLU(),
             # torch.nn.Flatten(),
             torch.nn.Linear(512, 512),
