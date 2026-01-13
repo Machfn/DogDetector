@@ -149,12 +149,14 @@ class NeuralNetwork(torch.nn.Module):
         super().__init__()
         self.flatten = torch.nn.Flatten()
         self.linear_relu_stack = torch.nn.Sequential(
-            """torch.nn.Conv2d(1,3, kernel_size=3, stride=2),
-            torch.nn.MaxPool2d(1, stride=1),
-            torch.nn.ReLU(),
-            torch.nn.Conv2d(3, 6, kernel_size=3, stride=2),
-            torch.nn.MaxPool2d(1, stride=1),
-            torch.nn.ReLU(),"""
+            #"""
+            #torch.nn.Conv2d(1,3, kernel_size=3, stride=2),
+            #torch.nn.MaxPool2d(1, stride=1),
+            #torch.nn.ReLU(),
+            #torch.nn.Conv2d(3, 6, kernel_size=3, stride=2),
+            #torch.nn.MaxPool2d(1, stride=1),
+            #torch.nn.ReLU(),
+            #"""
 
             torch.nn.Linear(512*1536, 512),
             #torch.nn.Linear(196607, 512),
@@ -174,36 +176,13 @@ class NeuralNetwork(torch.nn.Module):
     def forward(self, x):
         # print(x)
         x = self.flatten(x)
-        x = x.unsqueeze(dim=0)
+        # x = x.unsqueeze(dim=0)
         logits = self.linear_relu_stack(x)
         return logits
 
 
 
 model = NeuralNetwork().to(device)
-# print(model)
-
-
-# X = torch.rand(1,28,28, device=device)
-# logits = model(X)
-# pred_probab = torch.nn.Softmax(dim=1)(logits)
-# y_pred = pred_probab.argmax(1)
-# print(f"Predicated class: {y_pred}")
-
-
-# x = torch.ones(5)
-# y = torch.zeros(3)
-# w = torch.randn(5,3, requires_grad=True) 
-# b = torch.randn(3, requires_grad=True)
-# z = torch.matmul(x, w)+b
-
-# loss = torch.nn.functional.binary_cross_entropy_with_logits(z,y)
-
-# print(f"Gradient for loos function: {loss.grad_fn}")
-
-# loss.backward()
-
-# print(device)
 
 epochs = 40 # Number of times to iterate over the dataset
 learning_rate = 1e-10 # How much to update model parameters at each bath/epoch (Smaller = Slow learning, Large Values = Unpredicatble behavior while training)
@@ -228,8 +207,8 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         tLabel = torch.tensor(numLabel)
         tLabel = tLabel.to(device, non_blocking=True)
         pred = model(image).to(device)
-        print(pred)
-        print(pred.shape)
+        # print(pred)
+        # print(pred.shape)
         # print(tLabel)
         loss = loss_fn(pred,tLabel)
         optimizer.zero_grad()
