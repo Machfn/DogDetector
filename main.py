@@ -1,5 +1,6 @@
 import torch
 import os
+import csv
 import pandas as pd 
 import numpy as np
 from torchvision.io import decode_image
@@ -184,7 +185,7 @@ class NeuralNetwork(torch.nn.Module):
 
 model = NeuralNetwork().to(device)
 
-epochs = 40 # Number of times to iterate over the dataset
+epochs = 15 # Number of times to iterate over the dataset
 learning_rate = 1e-10 # How much to update model parameters at each bath/epoch (Smaller = Slow learning, Large Values = Unpredicatble behavior while training)
 batch_size = 64 # the #of data samples propagated through the network before the parameters are updated
 
@@ -256,31 +257,43 @@ print(device)
 # torch.save(model.state_dict(), "Athena_Network.pth")
 
 
-def isAthena(imageDir, model, trained=False, model_name=None):
+def isAthena(imageDir, model, trained=False, model_name=None, logging=False):
     model.eval() #switch to eval mode
-    img = decode_image(imageDir)
-    img = transform_pipeline(img)
-    img = img.unsqueeze(0).flatten(start_dim=1)
-    img = img.to(device)
     # img = DataLoader(img, batch_size=1, shuffle=False)
     # img = img.unsqueeze(0)
     # print(img.size())
-    output = model(img).to(device)
-    print(round(output[0, 0].item(), 5))
-    rounded = round(output[0, 0].item())
-    print(rounded)
-    fileName = imageDir.split("/")[-1]
-    print(f"{fileName}: True") if rounded < 0.5 else print(f"{fileName}: False")
-
+    with torch.no_grad():
+        img = decode_image(imageDir)
+        img = transform_pipeline(img)
+        img = img.unsqueeze(0).flatten(start_dim=1)
+        img = img.to(device)
+        output = model(img).to(device)
+        # print(round(output[0, 0].item(), 5))
+        rounded = round(output[0, 0].item(), 5)
+        # print(rounded)
+        fileName = imageDir.split("/")[-1]
+        if logging:
+            t = pd.read_csv(f"{fileName.split(".")[0]}.csv")
+            lenT = len(t['run']) + 1
+            with open(f"{fileName.split(".")[0]}.csv", 'a', newline='') as file:
+                load = [lenT, epochs, rounded]
+                writer = csv.writer(file)
+                writer.writerow(load)
+        print(f"{fileName}: True") if rounded < 0.5 else print(f"{fileName}: False")
 
 # model = torch.load('Athena_Network.pth', weights_only=False)
-isAthena('./testImages/isDog.jpg', model)
-isAthena('./testImages/notDog.jpg', model)
-isAthena('./testImages/campfire.jpg', model)
-isAthena('./testImages/darkSky.jpg', model)
-isAthena('./testImages/topDog.jpg', model)
-isAthena('./testImages/closeUpAthena.jpg', model)
+def testLoad():
+    isAthena('./testImages/isDog.jpg', model, logging=True)
+    isAthena('./testImages/notDog.jpg', model, logging=True)
+    # isAthena('./testImages/campfire.jpg', model)
+    # isAthena('./testImages/darkSky.jpg', model)
+    # isAthena('./testImages/topDog.jpg', model)
+    # isAthena('./testImages/closeUpAthena.jpg', model)
+
+iterations = 1
+
+for i in range(iterations):
+    testLoad()
 
 
-# time.sleep(7)
 print("Done")
